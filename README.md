@@ -27,14 +27,14 @@ lib/providers.js Multi-provider Formula 1 data layer
 lib/ai.js        Multi-provider AI race engineering engine
 lib/store.js     Multi-backend persistence abstraction
 lib/handler.js   Shared request handler (local server + serverless)
-server.js        Thin local development server
+dev-server.js    Thin local development server
 data/            Circuit + paddock reference data (and site.json when local)
 ```
 
 ## Run locally
 
 1. Install Node.js 20 or later.
-2. Run `npm start` (or `node server.js`) and open `http://localhost:3000`.
+2. Run `npm start` (or `node dev-server.js`) and open `http://localhost:3000`.
    `./run.ps1` starts the server and prompts for an admin password.
 3. To enable AI features locally, put your keys in `apikey.txt` (gitignored) or
    export `GROQ_API_KEY`, `GEMINI_API_KEY` and `OPENROUTER_API_KEY`.

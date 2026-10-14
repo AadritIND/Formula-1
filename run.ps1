@@ -11,7 +11,7 @@ if ($securePassword.Length -lt 12) {
 $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
 try {
     $env:APEX_ADMIN_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
-    node server.js
+    node dev-server.js
 }
 finally {
     [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)

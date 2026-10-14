@@ -4,7 +4,7 @@
   "private": true,
   "description": "Multi-page Formula 1 fan site with a multi-provider Node.js backend, deployed on Vercel.",
   "scripts": {
-    "start": "node server.js",
+    "start": "node dev-server.js",
     "dev": "vercel dev"
   },
   "engines": {

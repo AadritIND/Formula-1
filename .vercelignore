@@ -7,3 +7,4 @@ run.ps1
 .vercel
 .freebuff
 node_modules
+dev-server.js
