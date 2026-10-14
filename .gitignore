@@ -5,3 +5,6 @@ data/site.json.tmp
 apikey.txt
 .freebuff/
 .vercel/
+
+.vercel
+.env*
