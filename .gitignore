@@ -1,0 +1,7 @@
+node_modules/
+data/site.json
+data/site.json.tmp
+*.log
+apikey.txt
+.freebuff/
+.vercel/

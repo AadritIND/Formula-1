@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0b0c">
+  <title>Race Calendar — APEX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css?v=7"><link rel="stylesheet" href="/calendar.css?v=12">
+</head>
+<body data-page="calendar">
+  <div id="top"></div><div id="siteHeader"></div>
+  <main>
+    <section class="page-hero calendar-hero" data-mark="2026">
+      <div class="kicker">THE WORLD’S FASTEST TRAVELLING SHOW · SEASON CALENDAR</div>
+      <h1>THE LONG<br>WAY <em>AROUND.</em></h1>
+      <p>Every stop, every session, every local start time. Pick a weekend and follow the season around the world.</p>
+    </section>
+    <section class="page-body calendar-body">
+      <div class="calendar-heading">
+        <div><span class="calendar-overline">THE SEASON, IN MOTION</span><h2>WHAT’S <em>NEXT</em></h2></div>
+        
+      </div>
+
+      <section class="calendar-focus" id="calendarFocus" aria-live="polite">
+        <div class="focus-orbit"></div>
+        <div class="focus-copy">
+          <div class="focus-topline"><span class="focus-kicker"><i></i> NEXT LIGHTS OUT</span><span class="focus-round" id="focusRound">ROUND --</span></div>
+          <span class="focus-event" id="focusLocation">THE NEXT GRAND PRIX</span>
+          <h3 id="focusName">Finding the next weekend</h3>
+          <p id="focusCircuit">Circuit and local start time will appear here.</p>
+          <div class="focus-session-line"><span id="focusSession">NEXT SESSION · —</span><b id="focusStart">—</b></div>
+        </div>
+        <div class="focus-countdown-wrap"><div class="focus-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><span class="focus-countdown-label" id="focusCountdownLabel">COUNTDOWN TO SESSION</span><div class="focus-countdown" id="focusCountdown"><b>--</b><b>--</b><b>--</b><b>--</b></div><div class="focus-countdown-units"><span>DAYS</span><span>HRS</span><span>MIN</span><span>SEC</span></div><a href="/live" class="focus-link">RACE CONTROL <span>↗</span></a></div>
+        <svg class="focus-track" viewBox="0 0 420 250" aria-hidden="true"><path d="M54 157 C31 132 53 92 92 85 L147 77 C183 72 197 48 230 50 L303 54 C346 57 373 80 361 108 C351 132 318 134 296 123 L275 112 C249 98 231 106 218 127 L195 164 C179 188 144 195 117 183 L81 169 C68 165 59 163 54 157Z"/><path d="M55 157 C80 151 99 144 121 136 C146 126 161 108 177 92"/></svg>
+      </section>
+
+      <div class="calendar-stats" aria-label="Season summary"><div><b id="weekendCount">--</b><span>GRAND PRIX WEEKENDS</span></div><div><b id="sessionCount">--</b><span>SESSIONS ON THE BOARD</span></div><div><b id="completeCount">--</b><span>WEEKENDS COMPLETED</span></div><div class="calendar-updated"><span>SEASON PROGRESS</span><b id="seasonProgress">-- / --</b><small id="calendarUpdated">ROUNDS COMPLETED</small></div></div>
+
+      <div class="calendar-tools">
+        <label class="calendar-search"><span>FIND A WEEKEND</span><input id="raceSearch" type="search" placeholder="City, country, circuit…" autocomplete="off"><kbd>⌕</kbd></label>
+        <label class="calendar-select"><span>SESSION</span><select id="sessionFilter"><option value="all">ALL SESSIONS</option><option value="practice">PRACTICE</option><option value="qualifying">QUALIFYING</option><option value="sprint">SPRINT</option><option value="race">RACE</option></select></label>
+        <label class="calendar-select"><span>COUNTRY</span><select id="countryFilter"><option value="all">ALL COUNTRIES</option></select></label>
+        <div class="calendar-view-filter" role="group" aria-label="Filter race weekends"><button class="active" data-calendar-state="all">ALL <span id="allCount">--</span></button><button data-calendar-state="upcoming">UPCOMING</button><button data-calendar-state="complete">COMPLETED</button></div>
+      </div>
+      <div class="calendar-results-line"><span id="resultsLabel">ALL RACE WEEKENDS</span><span>SESSION TIMES SHOWN IN CIRCUIT LOCAL TIME</span></div>
+      <div id="calendarGrid" class="calendar-grid" aria-live="polite"></div>
+      <div id="calendarEmpty" class="calendar-empty" hidden>No race weekends match those filters. Try a different search or session.</div>
+
+      <div class="calendar-footnote"><span class="footnote-mark">i</span><p>Session times follow the UTC offset published for each event. Organizers can change the schedule; check official event information before travelling or making plans.</p><span class="data-source">INDEPENDENT FAN PROJECT · NOT AFFILIATED WITH FORMULA 1</span></div>
+      <div class="page-title-row calendar-next-title" style="margin-top:65px"><h2><span id="nextRaceLabel">THE NEXT RACE</span> <em>AT A GLANCE</em></h2><a href="/live" class="text-link">RACE CONTROL ↗</a></div>
+      <div class="track-fact-grid"><div class="track-fact"><b id="nextCircuit">—</b><span>CIRCUIT</span></div><div class="track-fact"><b id="nextRaceDate">—</b><span>WEEKEND START · LOCAL</span></div><div class="track-fact"><b id="nextRaceOffset">—</b><span>EVENT UTC OFFSET</span></div><div class="track-fact"><b id="nextRaceSessions">—</b><span>SESSIONS ON THE SCHEDULE</span></div></div>
+    </section>
+  </main>
+  <dialog class="circuit-dialog" id="circuitDialog" aria-labelledby="circuitTitle">
+    <div class="circuit-dialog-frame"><button class="circuit-close" id="circuitClose" aria-label="Close circuit details">×</button>
+      <div class="circuit-dialog-head"><span class="calendar-overline" id="circuitEyebrow">ROUND -- / CIRCUIT FILE</span><span class="circuit-dialog-status" id="circuitStatus">WEEKEND</span></div>
+      <h2 id="circuitTitle">CIRCUIT DETAILS</h2><p class="circuit-dialog-place" id="circuitPlace">—</p>
+      <div class="circuit-modal-grid">
+        <div class="circuit-map-panel">
+          <div class="circuit-map-top">
+            <div class="map-top-left">
+              <span>TRACK MAP <small id="trackMapSeason">OFFICIAL CIRCUIT LAYOUT</small></span>
+            </div>
+            <div class="circuit-map-controls" role="tablist" aria-label="Circuit views">
+              <button type="button" class="map-view-tab active" data-map-mode="detailed">OFFICIAL MAP</button>
+              <button type="button" class="map-view-tab" data-map-mode="telemetry">TELEMETRY & SECTORS</button>
+              <button type="button" class="map-view-tab" data-map-mode="ai">AI RACE INTEL</button>
+            </div>
+            <span class="map-live-key"><i></i> <span id="mapLiveStatus">OFFICIAL CIRCUIT MAP</span></span>
+          </div>
+          <div class="circuit-map" id="circuitMap"><div class="track-loading"><i></i> LOADING CIRCUIT TRACE</div></div>
+          <div class="circuit-map-legend" id="circuitLegend">
+            <span><i class="sector-a"></i> SECTOR 1</span>
+            <span><i class="sector-b"></i> SECTOR 2</span>
+            <span><i class="sector-c"></i> SECTOR 3</span>
+            <span><i class="overtake-dot"></i> OVERTAKE / STRAIGHT MODE</span>
+            <span><i class="speed-trap-dot"></i> SPEED TRAP</span>
+          </div>
+        </div>
+        <aside class="circuit-facts">
+          <div class="circuit-metric"><span>CIRCUIT</span><b id="circuitShort">—</b></div>
+          <div class="circuit-metric"><span>WEEKEND</span><b id="circuitDates">—</b></div>
+          <div class="circuit-metric"><span>SESSIONS</span><b id="circuitSessions">—</b></div>
+          <div class="circuit-metric"><span>TRACK DATA</span><b id="circuitDataState">FETCHING</b></div>
+          <div class="circuit-metric"><span>OVERTAKE ZONES</span><b id="circuitOvertakeZones">—</b></div>
+          <div class="circuit-metric"><span>SPEED TRAP</span><b id="circuitSpeedTrap">—</b></div>
+          <div class="circuit-tech-note" id="circuitTechNote">Circuit layout, sector markings, speed traps, and overtaking zones follow published technical data. 2026 uses active aero Overtake & Straight Mode.</div>
+        </aside>
+      </div>
+      <div class="circuit-bottom-grid">
+        <section class="circuit-podium-block" id="circuitPodiumBlock">
+          <div class="circuit-section-title"><span>01</span> CLASSIFICATION / PODIUM</div>
+          <div id="circuitPodium"></div>
+        </section>
+        <section class="circuit-schedule-block">
+          <div class="circuit-section-title"><span>02</span> WEEKEND RUN PLAN</div>
+          <div id="circuitSchedule"></div>
+        </section>
+      </div>
+      <p class="circuit-data-note" id="circuitDataNote">Official circuit artwork displays published track layout, turn sequence, timing sectors, speed traps, and 2026 Overtake Mode zones. Telemetry is verified against the 2026 FIA World Championship calendar.</p>
+    </div>
+  </dialog>
+  <div id="siteFooter"></div><div class="toast" id="toast"></div><script src="/site.js?v=12"></script>
+</body></html>

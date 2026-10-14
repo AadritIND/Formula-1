@@ -1,0 +1,9 @@
+.git
+.gitignore
+apikey.txt
+data/site.json
+*.log
+run.ps1
+.vercel
+.freebuff
+node_modules
