@@ -17,6 +17,9 @@ or blocked.
 | AI race engineering | Groq → Google Gemini → OpenRouter → local model |
 | Persistence | Upstash / Vercel KV → Vercel Blob → local file → memory |
 
+When a live provider answers, the saved fallback snapshot is refreshed in the
+store (throttled), so even a total upstream outage still serves recent real data.
+
 ## Layout
 
 ```
