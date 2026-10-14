@@ -21,20 +21,20 @@ or blocked.
 
 ```
 public/          Static site (HTML, CSS, JS, assets) — the deployed web root
-api/[...path].js Vercel serverless catch-all
+server.js        Vercel function entrypoint and local development server
+api/[...path].js Optional serverless route that re-exports the same handler
 lib/config.js    Secrets and central configuration
 lib/providers.js Multi-provider Formula 1 data layer
 lib/ai.js        Multi-provider AI race engineering engine
 lib/store.js     Multi-backend persistence abstraction
 lib/handler.js   Shared request handler (local server + serverless)
-dev-server.js    Thin local development server
 data/            Circuit + paddock reference data (and site.json when local)
 ```
 
 ## Run locally
 
 1. Install Node.js 20 or later.
-2. Run `npm start` (or `node dev-server.js`) and open `http://localhost:3000`.
+2. Run `npm start` (or `node server.js`) and open `http://localhost:3000`.
    `./run.ps1` starts the server and prompts for an admin password.
 3. To enable AI features locally, put your keys in `apikey.txt` (gitignored) or
    export `GROQ_API_KEY`, `GEMINI_API_KEY` and `OPENROUTER_API_KEY`.
@@ -43,8 +43,9 @@ data/            Circuit + paddock reference data (and site.json when local)
 
 ## Deploy on Vercel
 
-The repository is Vercel-ready: `public/` is the output directory and every
-`/api/*` request is handled by `api/[...path].js`.
+The repository is Vercel-ready: `public/` is the output directory and requests
+are handled by the Node function in `server.js` (which exports the shared
+handler).
 
 Set these environment variables on the project:
 
