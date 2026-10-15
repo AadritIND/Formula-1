@@ -15,6 +15,7 @@ or blocked.
 | Race classification | OpenF1 → Jolpica → saved snapshot |
 | Weekend podium | OpenF1 → Jolpica |
 | AI race engineering | Groq → Google Gemini → OpenRouter → local model |
+| Paddock news | RSS multi-source (Motorsport, Autosport, Crash, BBC, ESPN, RaceFans) → memory cache → saved snapshot |
 | Persistence | Upstash / Vercel KV → Vercel Blob → local file → memory |
 
 When a live provider answers, the saved fallback snapshot is refreshed in the
@@ -31,6 +32,7 @@ lib/providers.js Multi-provider Formula 1 data layer
 lib/ai.js        Multi-provider AI race engineering engine
 lib/store.js     Multi-backend persistence abstraction
 lib/handler.js   Shared request handler (local server + serverless)
+lib/news.js      Multi-source news tunnel (background RSS poll + image relay)
 data/            Circuit + paddock reference data (and site.json when local)
 ```
 
@@ -68,7 +70,7 @@ across instances without shared memory.
 - `/timing` — race classification and data notes
 - `/standings` — driver and constructor championship standings
 - `/calendar` — session-by-session season calendar in circuit local time
-- `/garage` — track, strategy and engineering stories
+- `/news-garage` — latest F1 headlines aggregated live from multiple publishers
 - `/fan-zone` — five-light reaction game and leaderboard
 - `/admin` — password-protected broadcast controls and newsletter list
 - `/privacy`, `/terms` — privacy notice and terms of use
@@ -77,7 +79,10 @@ across instances without shared memory.
 
 `GET /api/backends` (also `GET /api/health/backends`) probes every data and AI
 provider and reports the active storage driver. `GET /api/health` reports basic
-service health and whether admin access is configured.
+service health and whether admin access is configured. `GET /api/news` serves
+the aggregated news stream (append `?refresh=1` to force a poll, throttled to
+one per 30 seconds) and `GET /api/news/image?src=…` relays article images so
+the content security policy can stay locked to same-origin media.
 
 ## Accuracy notes
 

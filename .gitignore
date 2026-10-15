@@ -8,3 +8,4 @@ apikey.txt
 
 .vercel
 .env*
+data/news-cache.json

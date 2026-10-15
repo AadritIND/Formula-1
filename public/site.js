@@ -1,6 +1,6 @@
 (()=>{
 const pageName=document.body.dataset.page||'';
-const navItems=[['Home','/','home'],['Live','/live','live'],['Timing','/timing','timing'],['Standings','/standings','standings'],['Calendar','/calendar','calendar'],['Garage','/garage','garage'],['Fan zone','/fan-zone','fan-zone']];
+const navItems=[['Home','/','home'],['Live','/live','live'],['Timing','/timing','timing'],['Standings','/standings','standings'],['Calendar','/calendar','calendar'],['News Garage','/news-garage','news'],['Fan zone','/fan-zone','fan-zone']];
 const headerRoot=document.querySelector('#siteHeader');
 if(headerRoot)headerRoot.innerHTML=`<div class="topline"><span><i class="pulse"></i> THE PADDOCK NEVER SLEEPS</span><span class="top-center">A FAN-POWERED MOTORSPORT JOURNAL</span><span>EST. 2026 <b>✳</b> BUILT FOR THE GRID</span></div><header class="nav"><a class="brand" href="/" aria-label="Apex home"><span class="brandmark"><svg viewBox="0 0 42 30"><path d="M2 24 15 4h8l-7 11h9l8-11h7L26 26h-8l5-8h-9l-5 8H2Z" fill="currentColor"/><path d="M3 28h25" stroke="currentColor" stroke-width="2"/></svg></span><span>APEX<span class="brand-dot">.</span><small>RACE CULTURE</small></span></a><button class="menu-toggle" aria-label="Open navigation">☰</button><nav class="navlinks">${navItems.map(([label,url,key])=>`<a class="${pageName===key?'active':''}" href="${url}">${label.toUpperCase()}</a>`).join('')}</nav><a class="nav-cta" href="/admin"><span class="live-dot"></span> RACE CONTROL <span>↗</span></a></header>`;
 const footerRoot=document.querySelector('#siteFooter');
@@ -146,7 +146,7 @@ window.APEX={api,toast,escapeHtml,openF1Schedule,openF1Json,openF1Standings,open
 window.openF1Standings=openF1Standings;
 window.openF1Timing=openF1Timing;
 
-const pageScripts={home:'/home.js?v=5',live:'/live.js?v=6',timing:'/timing.js?v=5',standings:'/standings.js?v=6',calendar:'/calendar.js?v=14','fan-zone':'/fan-zone.js?v=3',admin:'/admin.js?v=5',privacy:'/privacy.js?v=5'};
+const pageScripts={home:'/home.js?v=6',live:'/live.js?v=10',timing:'/timing.js?v=5',standings:'/standings.js?v=6',calendar:'/calendar.js?v=14',news:'/news.js?v=1','fan-zone':'/fan-zone.js?v=3',admin:'/admin.js?v=7',privacy:'/privacy.js?v=5'};
 if(pageScripts[pageName]){
   const pageScript=document.createElement('script');
   pageScript.src=pageScripts[pageName];
@@ -154,3 +154,4 @@ if(pageScripts[pageName]){
   document.body.appendChild(pageScript);
 }
 })();
+
