@@ -40,7 +40,7 @@
       ? `<img src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async">`
       : '';
     const flag = isNew ? '<b class="news-flag">NEW</b>' : '';
-    return `<a class="news-card${isNew ? ' is-new' : ''}" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">
+    return `<a class="news-card${isNew ? ' is-new' : ''}" data-id="${escapeHtml(item.id)}" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">
       <span class="news-thumb" data-mark="${escapeHtml(item.source)}">${thumb}<span class="news-badge">${escapeHtml(item.source)}${flag}</span></span>
       <span class="news-body">
         <time class="news-time" datetime="${escapeHtml(item.published)}">${timeAgo(item.published)}</time>
@@ -76,6 +76,20 @@
       // The lead card treatment belongs to the newest story regardless of age.
       const lead = grid.querySelector('.news-card');
       if (lead) lead.classList.add('is-lead');
+    }
+
+    // A story can gain its image a tick after it appears (the tunnel reads the
+    // article page's preview image), so fill those cards in without a reload.
+    for (const item of items) {
+      if (!item.image) continue;
+      const thumb = grid.querySelector(`.news-card[data-id="${item.id}"] .news-thumb`);
+      if (!thumb || thumb.querySelector('img')) continue;
+      const img = document.createElement('img');
+      img.src = item.image;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      thumb.prepend(img);
     }
 
     if (state) {

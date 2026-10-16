@@ -40,6 +40,11 @@
   let total = 0;
   let pinned = true;
   let pollFailed = false;
+  // Slow mode is a server rule; the composer just mirrors it so a viewer is not
+  // invited to type a message the server is about to refuse.
+  let slowSeconds = 4;
+  let cooldownUntil = 0;
+  let cooldownTimer = null;
   const seen = new Set();
   let reactions = {}; // { [messageId]: { emoji: count } } — server is the authority
 
@@ -173,6 +178,27 @@
     render();
   }
 
+  function syncComposer() {
+    const ready = live && Date.now() >= cooldownUntil;
+    sendButton.disabled = !ready;
+    if (live && slowSeconds > 5) messageField.placeholder = `SLOW MODE · ONE MESSAGE EVERY ${slowSeconds}s`;
+    else messageField.placeholder = 'MESSAGE THE PADDOCK…';
+  }
+
+  function startCooldown() {
+    clearInterval(cooldownTimer);
+    cooldownTimer = setInterval(() => {
+      const left = Math.ceil((cooldownUntil - Date.now()) / 1000);
+      if (left <= 0) {
+        clearInterval(cooldownTimer);
+        note.textContent = '';
+      } else if (live) {
+        note.textContent = `SLOW MODE · NEXT MESSAGE IN ${left}s`;
+      }
+      syncComposer();
+    }, 500);
+  }
+
   function render() {
     const hasLines = Boolean(log.querySelector('.chat-line'));
     card.dataset.chat = live ? 'open' : 'locked';
@@ -180,7 +206,7 @@
     stateChip.querySelector('.chat-state-brief').textContent = live ? 'OPEN' : 'LOCKED';
     nameField.disabled = !live;
     messageField.disabled = !live;
-    sendButton.disabled = !live;
+    syncComposer();
     if (!hasLines) {
       empty.hidden = false;
       empty.textContent = live
@@ -204,6 +230,7 @@
       const data = await api('/api/chat');
       const wasLive = live;
       live = Boolean(data.live);
+      slowSeconds = Number(data.slowSeconds) || slowSeconds;
       // Clear our own error note once the service answers again.
       if (wasLive !== live || pollFailed) note.textContent = '';
       pollFailed = false;
@@ -246,6 +273,7 @@
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!live) { note.textContent = 'Chat is closed until the session goes live.'; return; }
+    if (Date.now() < cooldownUntil) { note.textContent = 'Slow mode is on — wait for the countdown.'; return; }
     const text = messageField.value.trim();
     if (text.length < 2) { note.textContent = 'Write a message before sending.'; return; }
     const name = nameField.value.trim().slice(0, 24);
@@ -256,11 +284,12 @@
       const data = await api('/api/chat', { method: 'POST', body: JSON.stringify({ name, text }) });
       messageField.value = '';
       note.textContent = '';
+      if (slowSeconds > 5) { cooldownUntil = Date.now() + slowSeconds * 1000; startCooldown(); }
       if (data.message) { addMessages([data.message]); pinned = true; log.scrollTop = log.scrollHeight; }
     } catch (error) {
       note.textContent = error.message;
     }
-    sendButton.disabled = false;
+    syncComposer();
     refresh();
   });
 

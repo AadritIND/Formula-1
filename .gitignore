@@ -9,3 +9,5 @@ apikey.txt
 .vercel
 .env*
 data/news-cache.json
+apex-store-*.json
+.kombai/

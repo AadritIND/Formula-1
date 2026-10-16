@@ -8,6 +8,23 @@ if(footerRoot)footerRoot.innerHTML=`<footer class="footer"><a class="brand" href
 document.querySelector('.menu-toggle')?.addEventListener('click',()=>document.querySelector('.navlinks')?.classList.toggle('open'));
 document.querySelectorAll('.navlinks a').forEach(a=>a.addEventListener('click',()=>document.querySelector('.navlinks')?.classList.remove('open')));
 
+// Operator announcement strip: one small config read per page load, rendered
+// above the site chrome and dismissible for the rest of the session.
+async function renderBanner(){
+  try{
+    const cfg=await api('/api/public/config');
+    const banner=cfg.banner||{},text=String(banner.text||'').trim();
+    if(!banner.enabled||!text)return;
+    try{if(sessionStorage.getItem('apex_banner')===text)return}catch{}
+    const node=document.createElement('div');
+    node.className='site-banner is-'+(banner.tone==='alert'?'alert':'info');
+    node.innerHTML='<span class="site-banner-tag">RACE CONTROL</span><span class="site-banner-text">'+escapeHtml(text)+'</span><button type="button" class="site-banner-close" aria-label="Dismiss announcement">✕</button>';
+    node.querySelector('.site-banner-close').addEventListener('click',()=>{try{sessionStorage.setItem('apex_banner',text)}catch{}node.remove()});
+    document.body.insertBefore(node,document.body.firstChild);
+  }catch{/* an announcement is never worth blocking the page for */}
+}
+renderBanner();
+
 async function api(path,options={}){
   const response=await fetch(path,{...options,headers:{'Content-Type':'application/json',...(options.headers||{})}});
   const data=await response.json().catch(()=>({error:'Unexpected server response.'}));
@@ -146,7 +163,7 @@ window.APEX={api,toast,escapeHtml,openF1Schedule,openF1Json,openF1Standings,open
 window.openF1Standings=openF1Standings;
 window.openF1Timing=openF1Timing;
 
-const pageScripts={home:'/home.js?v=6',live:'/live.js?v=10',timing:'/timing.js?v=5',standings:'/standings.js?v=6',calendar:'/calendar.js?v=14',news:'/news.js?v=1','fan-zone':'/fan-zone.js?v=3',admin:'/admin.js?v=7',privacy:'/privacy.js?v=5'};
+const pageScripts={home:'/home.js?v=6',live:'/live.js?v=14',timing:'/timing.js?v=5',standings:'/standings.js?v=6',calendar:'/calendar.js?v=14',news:'/news.js?v=2','fan-zone':'/fan-zone.js?v=3',admin:'/admin.js?v=14',privacy:'/privacy.js?v=5'};
 if(pageScripts[pageName]){
   const pageScript=document.createElement('script');
   pageScript.src=pageScripts[pageName];

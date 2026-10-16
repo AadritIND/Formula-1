@@ -140,3 +140,98 @@
 .chat-react-pick button.mine{border-color:#ed1c2490;background:#2a1113}
 .chat-card[data-chat="locked"] .chat-react-add,.chat-card[data-chat="locked"] .chat-react-pick{display:none}
 @media(max-width:560px){.chat-react-chip{padding:4px 7px}.chat-react-add{padding:3px 7px}}
+/* Operator announcement strip: written in the control room, shown above the
+   site chrome on every public page. */
+.site-banner{display:flex;align-items:center;gap:14px;padding:11px 18px;background:#141518;border-bottom:1px solid #ffffff1a;color:#cfccc6;position:relative;z-index:60}
+.site-banner.is-alert{background:#2a1113;border-bottom-color:#ed1c2455;color:#ffd9da}
+.site-banner-tag{flex:0 0 auto;font:9px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--red);padding:4px 8px}
+.site-banner.is-info .site-banner-tag{background:#2c2e33}
+.site-banner-text{flex:1 1 auto;font:13px var(--sans);line-height:1.5}
+.site-banner-close{flex:0 0 auto;background:none;border:1px solid #ffffff26;color:#9a978f;font:10px var(--mono);padding:3px 8px;cursor:pointer;transition:.15s}
+.site-banner-close:hover{color:#fff;border-color:#ffffff55}
+@media(max-width:560px){.site-banner{flex-wrap:wrap;gap:8px}.site-banner-text{flex-basis:100%;order:3}}
+.admin-banner-preview{margin-top:16px;border:1px solid #ffffff1a}
+.admin-check{display:flex;align-items:center;gap:8px;font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#9a978f;cursor:pointer}
+.admin-check input{width:auto;margin:0}
+.admin-form-inline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid #ffffff12}
+.admin-form-inline .form-msg{margin:0}
+.admin-hint{font:10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#8c8a85}
+.admin-preview{margin-top:16px;aspect-ratio:16/9;background:#0d0e10;border:1px solid #ffffff14;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.admin-preview iframe{display:block;width:100%;height:100%;border:0}
+
+/* ---- Live timing tower + team radio (live page) ---- */
+.timing-radio-grid{display:grid;grid-template-columns:minmax(0,2.05fr) minmax(330px,1fr);gap:20px;align-items:start;margin-top:18px}
+.timing-panel,.radio-panel{border:1px solid #ffffff12;background:#111214}
+.timing-panel-head,.radio-panel-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #ffffff12;background:#0e0f11;flex-wrap:wrap}
+.timing-session{display:flex;flex-direction:column;gap:3px;min-width:0}
+.timing-session-name{font-family:var(--display);font-weight:800;font-size:17px;letter-spacing:.02em;text-transform:uppercase;color:var(--paper)}
+.timing-session-meta,.radio-sub{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.timing-chips{display:flex;gap:6px;flex-wrap:wrap}
+.timing-chip{font-family:var(--mono);font-size:10px;letter-spacing:.1em;padding:4px 8px;border:1px solid #ffffff18;color:#c9c7c2;background:#131417;white-space:nowrap}
+.timing-chip b{color:var(--paper);font-weight:500}
+.timing-chip.is-live{border-color:#ff2d2d66;color:#ff6b6b}
+.timing-chip.is-warn{border-color:#f0b42955;color:#f0b429}
+.timing-scroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.timing-table{width:100%;min-width:640px;border-collapse:collapse;font-family:var(--mono);font-size:11.5px}
+.timing-table th{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#6f6d68;font-weight:500;text-align:right;padding:9px 6px;border-bottom:1px solid #ffffff12;background:#0d0e10;white-space:nowrap}
+.timing-table th.t-driver{text-align:left}
+.timing-table td{padding:9px 6px;text-align:right;border-bottom:1px solid #ffffff08;color:#d7d5d0;white-space:nowrap;font-variant-numeric:tabular-nums}
+.timing-table tbody tr:hover{background:#ffffff07}
+.timing-table .t-pos{text-align:center;color:var(--muted);width:34px}
+.timing-table .t-driver{text-align:left;min-width:126px}
+.timing-driver{display:flex;align-items:center;gap:9px}
+.timing-bar{width:3px;height:22px;flex:0 0 3px;background:#3a3b3f}
+.timing-code{font-family:var(--display);font-weight:800;font-size:13px;letter-spacing:.03em;color:var(--paper)}
+.timing-driver-meta{display:flex;flex-direction:column;line-height:1.25}
+.timing-driver-meta small{font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:#6f6d68;max-width:104px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.timing-leader td{color:var(--paper)}
+.timing-gap{color:#eae8e3}
+.timing-fastest{color:#c77dff;font-weight:500}
+.timing-personal{color:#4ade80}
+.timing-none{color:#585652}
+.timing-tyre{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
+.tyre-dot{width:14px;height:14px;border-radius:50%;display:inline-block;border:2px solid #ffffff2e;font-size:0}
+.tyre-SOFT{background:#e10600}.tyre-MEDIUM{background:#ffd12e}.tyre-HARD{background:#f2f2f2}
+.tyre-INTERMEDIATE{background:#43b02a}.tyre-WET{background:#0b6ec7}.tyre-UNKNOWN{background:#3a3b3f}
+.timing-sub{display:block;font-size:9px;color:#6f6d68;letter-spacing:.06em}
+.timing-empty{text-align:center!important;color:var(--muted);padding:26px 10px!important;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.timing-panel-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 16px;background:#0e0f11;flex-wrap:wrap}
+.timing-legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#6f6d68}
+.timing-legend i{font-style:normal;display:inline-block;width:7px;height:7px;margin-right:5px;vertical-align:middle}
+.legend-fastest i{background:#c77dff}.legend-personal i{background:#4ade80}.legend-plain i{background:#585652}
+.timing-note{margin:0;padding:10px 16px 14px;font-size:11px;line-height:1.6;color:var(--muted);border-top:1px solid #ffffff08}
+.timing-note:empty{display:none}
+.radio-panel{display:flex;flex-direction:column}
+.radio-title{font-family:var(--display);font-weight:800;font-size:16px;letter-spacing:.03em;color:var(--paper)}
+.radio-model{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);border:1px solid #e1060044;padding:4px 7px;white-space:nowrap}
+.radio-list{display:flex;flex-direction:column;max-height:560px;overflow-y:auto}
+.radio-item{padding:13px 16px;border-bottom:1px solid #ffffff0f}
+.radio-item-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.radio-avatar{width:3px;height:16px;background:#3a3b3f;flex:0 0 3px}
+.radio-who{font-family:var(--display);font-weight:800;font-size:13px;color:var(--paper);letter-spacing:.04em}
+.radio-team{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#6f6d68}
+.radio-time{margin-left:auto;font-family:var(--mono);font-size:9px;color:#6f6d68;white-space:nowrap}
+.radio-text{margin:0;font-size:13px;line-height:1.65;color:#dbd9d4}
+.radio-text.is-pending{color:#6f6d68;font-style:italic}
+.radio-link{display:inline-block;margin-top:7px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);text-decoration:none}
+.radio-link:hover{text-decoration:underline}
+.radio-empty{padding:22px 16px;font-size:12px;line-height:1.7;color:var(--muted)}
+.radio-foot{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid #ffffff12;background:#0e0f11;flex-wrap:wrap}
+.radio-state{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#6f6d68}
+.radio-notice{margin:0;padding:11px 16px 14px;font-size:10px;line-height:1.6;color:#6f6d68;border-top:1px solid #ffffff08}
+@media(max-width:1080px){.timing-radio-grid{grid-template-columns:minmax(0,1fr)}.radio-list{max-height:none}}
+@media(max-width:620px){.timing-table{font-size:11px;min-width:520px}.timing-table .t-int,.timing-table .t-trap,.timing-table .t-pits,.timing-table .t-laps{display:none}.timing-table th,.timing-table td{padding:8px 5px}.timing-driver-meta small{max-width:78px}.timing-legend::after{content:"SWIPE →";color:#6f6d68}}
+
+/* ---- Operator accounts: sign-in steps, invitations, recovery codes ---- */
+.admin-session-pill{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#c9c7c2;border:1px solid #ffffff18;padding:5px 9px;margin-right:12px}
+.admin-session-pill.is-break-glass{border-color:#f0b42966;color:#f0b429}
+.admin-role-badge{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);border:1px solid #e1060044;padding:3px 7px;white-space:nowrap}
+.admin-secret{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0;padding:12px 14px;border:1px solid #ffffff14;background:#0d0e10}
+.admin-secret span{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#6f6d68}
+.admin-secret code{font-family:var(--mono);font-size:13px;letter-spacing:.08em;color:#f0eee8;word-break:break-all}
+.admin-recovery{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;margin:14px 0;padding:0;list-style:none}
+.admin-recovery li{font-family:var(--mono);font-size:13px;letter-spacing:.1em;color:#f0eee8;border:1px solid #ffffff14;background:#0d0e10;padding:9px 10px;text-align:center}
+.admin-list-row.admin-list-stack{flex-direction:column;align-items:stretch;gap:7px}
+.admin-list-row.admin-list-stack small{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:#6f6d68;text-transform:uppercase}
+.admin-row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.admin-actions-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
