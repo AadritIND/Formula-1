@@ -3,6 +3,11 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "outputDirectory": "public",
+  "functions": {
+    "server.js": {
+      "maxDuration": 30
+    }
+  },
   "redirects": [
     { "source": "/reaction.html", "destination": "/fan-zone#lights", "permanent": false },
     { "source": "/reaction", "destination": "/fan-zone#lights", "permanent": false },
