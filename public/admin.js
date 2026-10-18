@@ -104,7 +104,7 @@ function renderSession(account){
 // routes anyway; this only keeps the panel honest about what it can do.
 const CARD_PERMISSIONS={
   'PUBLIC LIVE PAGE':'config','SITE ANNOUNCEMENT':'config','LIVE CHAT':'chat','TEAM RADIO':'radio',
-  'NEWS TUNNEL':'news','SERVER STATUS':'diagnostics','SYSTEM':'diagnostics','OPERATOR LOG':'audit',
+  'NEWS TUNNEL':'news','SERVER STATUS':'diagnostics','SYSTEM':'diagnostics','LIVE FEED':'diagnostics','OPERATOR LOG':'audit',
   'OPT-IN SUBSCRIBERS':'export','OPERATORS':'operators','MY ACCOUNT':null
 };
 function applyRoleVisibility(permissions){
@@ -302,6 +302,66 @@ async function loadSystem(){
       +adminRow('CHECKED',esc(new Date().toLocaleTimeString()));
   }catch(e){root.innerHTML=adminRow('DIAGNOSTICS',esc(e.message))}
 }
+// --- Live feed health ---------------------------------------------------------
+// The connection is what decides whether the public page is live, so the panel
+// names it plainly: connected, waiting or idle, how old the last frame is, what
+// F1's own session status says, and what the site did with that answer.
+function sessionText(session){
+  if(!session)return '—';
+  const label=[session.event,session.name].filter(Boolean).join(' · ')||session.type||'—';
+  const when=session.startsAt?new Date(session.startsAt).toLocaleString():'';
+  return when?`${label} · ${when}`:label;
+}
+async function loadLiveFeed(){
+  const root=document.querySelector('#liveFeedStatus');
+  try{
+    const d=await api('/api/admin/live');
+    const feed=d.feed||{},v=d.verdict||{},state=d.state||{},timing=d.timing||{};
+    const frameAge=Number.isFinite(feed.ageSeconds)?feed.ageSeconds:null;
+    const connection=feed.connected
+      ?`<b class="live-feed-ok">● CONNECTED</b> · FRAME ${frameAge===null?'—':`${frameAge}s AGO`}`
+      :feed.running
+        ?'<b class="live-feed-warn">○ CONNECTING</b> · WAITING FOR THE FIRST FRAME'
+        :'<b class="live-feed-down">○ IDLE</b> · NOTHING POLLED BETWEEN SESSIONS';
+    // F1 repeats itself in these fields (Status and Started are often the same
+    // word), so the line names each distinct verdict once.
+    const seen=new Set();
+    const verdict=[[v.started,'STARTED'],[v.status,'STATUS'],[v.archiveStatus,'ARCHIVE']]
+      .filter(([value])=>value&&!seen.has(String(value).toLowerCase())&&seen.add(String(value).toLowerCase()))
+      .map(([value,label])=>`${label} ${esc(String(value).toUpperCase())}`);
+    const stateLine=state
+      ?`${state.live?'<b class="live-feed-ok">ON AIR</b>':'<b class="live-feed-warn">OFF AIR</b>'} · PROOF ${esc(String(state.proof||'—').toUpperCase())}${state.live&&state.kind?` · ${esc(String(state.kind).toUpperCase().replace(/-/g,' '))}`:''}`
+      :esc(d.stateError||'unavailable');
+    const towerLine=timing
+      ?`${esc(String(timing.source||'—').toUpperCase())} · ${Number(timing.cars)||0} CARS · ${timing.live?'<b class="live-feed-ok">LIVE READING</b>':timing.simulated?'<b class="live-feed-warn">SAVED CLASSIFICATION</b>':'ARCHIVE READING'}${timing.refreshedAt?` · READ ${Math.max(0,Math.round((Date.now()-Date.parse(timing.refreshedAt))/1000))}s AGO`:''}`
+      :esc(d.timingError||'unavailable');
+    root.innerHTML=[
+      adminRow('CONNECTION',connection),
+      adminRow('SERVICE',esc(`${String(feed.endpoint||'').replace(/^https?:\/\//,'')}${feed.persist?' · ONE KEPT SOCKET':' · PER-REQUEST SOCKET'}`)),
+      adminRow('WATCHING',esc(v.sessionKey?`${sessionText({event:v.meetingName,name:v.sessionName})} · KEY ${v.sessionKey}`:'NOTHING YET')),
+      adminRow('FEED VERDICT',verdict.length?verdict.join(' · '):'NOTHING PUBLISHED YET'),
+      adminRow('FRAMES',esc(`${feed.frames||0} received · ${feed.reconnects||0} reconnect(s)`)),
+      adminRow('IN HAND',esc(`${feed.drivers||0} drivers · ${feed.radio||0} radio capture(s)`)),
+      adminRow('TOPICS',feed.topics&&feed.topics.length?esc(feed.topics.join(', ')):'NONE YET'),
+      feed.error?adminRow('FEED ERROR',`<b class="live-feed-down">${esc(feed.error)}</b>`):'',
+      adminRow('SESSION STATE',stateLine),
+      adminRow(state&&state.live?'LIVE SESSION':'NEXT SESSION',esc(sessionText(state&&(state.live?(state.liveSession||state.session):state.nextSession)))),
+      adminRow('STATE RE-READ',state&&state.nextChangeAt?esc(`${state.pollMs?`${Math.round(state.pollMs/1000)}s hold · `:''}next ${new Date(state.nextChangeAt).toLocaleTimeString()}`):'—'),
+      adminRow('TIMING TOWER',towerLine),
+      (state&&state.scheduleErrors&&state.scheduleErrors.length)?adminRow('SCHEDULE',`<b class="live-feed-warn">${esc(state.scheduleErrors.join(' · '))}</b>`):'',
+      adminRow('CHECKED',esc(new Date().toLocaleTimeString()))
+    ].filter(Boolean).join('');
+  }catch(e){
+    root.innerHTML=adminRow('LIVE FEED',`<b class="live-feed-down">${esc(e.message)}</b>`)+adminRow('EXPECTED','A signed-in operator with diagnostics access sees this panel.');
+  }
+}
+let liveFeedTimer=0;
+function startLiveFeedTimer(){
+  clearInterval(liveFeedTimer);
+  liveFeedTimer=setInterval(()=>{if(document.hidden||!hasPermission('diagnostics'))return;loadLiveFeed()},15000);
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&hasPermission('diagnostics')&&!dash.hidden)loadLiveFeed()});
+document.querySelector('#refreshLiveFeed').addEventListener('click',()=>loadLiveFeed());
 function renderTunnel(d){
   const root=document.querySelector('#tunnelStatus');
   root.innerHTML=adminRow('STORIES ON THE WIRE',esc(d.total))
@@ -326,7 +386,7 @@ async function loadAudit(){
 }
 function loadAdminExtras(){
   if(hasPermission('news'))loadTunnel();
-  if(hasPermission('diagnostics'))loadSystem();
+  if(hasPermission('diagnostics')){loadSystem();loadLiveFeed();startLiveFeedTimer()}
   if(hasPermission('audit'))loadAudit();
   if(hasPermission('radio'))loadRadio();
   if(hasPermission('operators'))loadOperators();

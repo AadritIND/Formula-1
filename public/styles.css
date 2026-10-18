@@ -266,3 +266,6 @@
 .admin-list-row.admin-list-stack small{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:#6f6d68;text-transform:uppercase}
 .admin-row-actions{display:flex;gap:6px;flex-wrap:wrap}
 .admin-actions-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.admin-list-row .live-feed-ok{color:#6fd894}
+.admin-list-row .live-feed-warn{color:#e8b23a}
+.admin-list-row .live-feed-down{color:#ff6b6b}

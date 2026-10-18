@@ -135,6 +135,10 @@ The roles card in the panel lists the exact permissions behind each role.
   and mirrored in the composer, which counts down before you can post again.
 - **Moderation** — the live chat log with per-line delete and clear-all.
 - **News tunnel** — per-source health, story count and a manual *Poll feeds now*.
+- **Live feed** — the connection to F1's live timing service, the verdict that
+  service is publishing for the session it is watching, the state the public page
+  is being served from and what the tower is reading, refreshed every fifteen
+  seconds (`GET /api/admin/live`, diagnostics role). Read-only.
 - **System** — storage driver, runtime, provider health, store counts, live
   diagnostics refresh and a JSON export of the store (never the admin credential).
 - **Operator log** — every action taken here (broadcast changes, moderation,
