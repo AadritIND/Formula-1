@@ -11,3 +11,5 @@ apikey.txt
 data/news-cache.json
 apex-store-*.json
 .kombai/
+.verify/*.pid
+.verify/data-real/

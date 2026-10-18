@@ -69,11 +69,13 @@
   nameField.value = localStorage.getItem(NAME_KEY) || '';
   nameField.addEventListener('change', () => localStorage.setItem(NAME_KEY, nameField.value.trim().slice(0, 24)));
 
-  // Beside the broadcast the column is capped to the video panel, so a busy chat
-  // scrolls inside its own log instead of stretching the page.
+  // Beside the broadcast the column is capped a little past the video panel, so
+  // the chat gets real room to read in while a busy log still scrolls inside
+  // itself instead of stretching the page.
+  const CHAT_HEADROOM = 150;
   function syncLayout() {
     if (!side || !stage) return;
-    if (window.innerWidth > 900) side.style.setProperty('--live-side-h', `${Math.round(stage.getBoundingClientRect().height)}px`);
+    if (window.innerWidth > 900) side.style.setProperty('--live-side-h', `${Math.round(stage.getBoundingClientRect().height) + CHAT_HEADROOM}px`);
     else side.style.removeProperty('--live-side-h');
   }
 

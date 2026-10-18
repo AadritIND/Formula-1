@@ -15,8 +15,9 @@ or blocked.
 | Race classification | OpenF1 → Jolpica → saved snapshot |
 | Weekend podium | OpenF1 → Jolpica |
 | AI race engineering | Groq → Google Gemini → OpenRouter → local model |
-| Live timing tower | OpenF1 (sessions, position, intervals, laps, stints, pit, speed trap) → saved classification |
-| Team radio transcripts | OpenF1 recordings → Groq Whisper → call list without transcripts |
+| Live timing tower | F1 live timing feed (signalR hub, pushed) → OpenF1 archive → saved classification |
+| Session state (is anything on air?) | F1 live timing feed → published schedule (OpenF1 → Jolpica) |
+| Team radio | F1 live timing feed captures → OpenF1 recordings → Groq Whisper → call list without transcripts |
 | Paddock news | RSS multi-source (Motorsport, Autosport, Crash, BBC, ESPN, RaceFans) → memory cache → saved snapshot |
 | Persistence | Upstash / Vercel KV → Vercel Blob → local file → memory |
 
@@ -38,6 +39,8 @@ lib/store.js     Multi-backend persistence abstraction
 lib/handler.js   Shared request handler (local server + serverless)
 lib/news.js      Multi-source news tunnel (background RSS poll + image relay)
 lib/openf1.js    Throttled OpenF1 client (3 requests/second ceiling, shared cache)
+lib/livesignal.js F1 live timing connector (negotiate + WebSocket, snapshot merge, keepalive)
+lib/sessionstate.js The one answer to "is a broadcast session on air?" (feed, then schedule)
 lib/livetiming.js Live timing tower aggregation (laps, sectors, stints, pit stops)
 lib/radio.js     Team radio call list and Whisper transcription (one call at a time)
 data/            Circuit + paddock reference data (and site.json when local)
@@ -155,12 +158,91 @@ Below the broadcast, `/live` shows a timing tower rebuilt from OpenF1's timing
 loop for the latest session: position, gap to leader, interval, last lap, the
 three sector times (purple for a session best, green for a personal best), speed
 trap, the tyre fitted with its compound, age and stint, every pit stop with its
-box time, and lap count. `GET /api/live/timing` caches the assembled tower for 30
-seconds; when OpenF1 cannot be reached the endpoint answers with the saved
-classification, clearly labelled as such, instead of an error.
+box time, and lap count. When OpenF1 cannot be reached the endpoint answers with
+the saved classification, clearly labelled as such, instead of an error.
+
+Nothing on the page is behind a refresh button. The tower keeps itself current:
+every second the page asks `GET /api/live/timing?probe=1`, which returns only the
+reading's fingerprint and how fresh it is (around 250 bytes), and the full tower
+is fetched only when that fingerprint has moved — so the panel is never more than
+a second behind a reading without re-sending 16 KB every second. The server holds
+the assembled tower for 45 seconds (`APEX_TIMING_TTL_MS`) and for 5 seconds while
+a session is actually on track (`APEX_TIMING_LIVE_TTL_MS`), which keeps OpenF1
+well inside its rate limits while a live race still moves.
+
+The panel is explicit about the state of play. During a broadcast session the
+tower is the real running order pushed straight from F1's own live timing hub:
+`lib/livesignal.js` negotiates with `livetiming.formula1.com/signalrcore`, keeps
+one WebSocket open, merges the deltas (position, laps, sectors, stints, pit
+stops, team radio captures) onto the session snapshot, and drops the connection
+the moment the feed says the session has finished. The tower re-renders from that
+in-memory state once a second. Between sessions the hub is not contacted at all:
+the tower below a countdown is the last completed session, read from OpenF1 and
+labelled `LAST SESSION · FINAL`, with the feed's own final classification kept on
+the panel until the archive is published.
+
+### When the site is live
+
+One answer decides every live surface on the site — the timing tower, the team
+radio panel, the countdown gate and the paddock chat — and it lives in
+`lib/sessionstate.js`:
+
+1. **The feed, when it is attached to the session in question.** F1's live
+timing publishes `Started` / `Finished` for itself, and that outranks any
+timetable: a race that runs long stays live, and a session that ends early stops
+the site the moment the flag drops. A feed still holding the previous round
+cannot keep the site live, and it cannot cancel a session the schedule says is
+on.
+2. **The published schedule otherwise.** A session is on air only when it is a
+free practice, a sprint qualifying, a qualifying, a sprint or the race, and only
+inside its window — opened five minutes before the start and held twenty minutes
+past the scheduled end, because sessions routinely start late and run over.
+
+Everything else is off air, and nothing polls: testing, shakedowns and `Day 2`
+sessions never count, so an idle week costs no requests and no connections. Set
+`APEX_LIVE_KINDS` (for example `race,sprint`) to narrow which sessions go live,
+`APEX_LIVE_LEAD_MS` / `APEX_LIVE_GRACE_MS` to widen the window,
+`APEX_STATE_LIVE_TTL_MS` / `APEX_STATE_TTL_MS` to change how often the answer is
+recomputed on air and off it (default 5 s / 5 min), and `APEX_SIGNAL_URL` /
+`APEX_SIGNAL_STATIC` if F1 ever moves the hub.
+
+The page follows the same answer: the countdown ticks in the circuit's own time
+while the session is off air (the tower below is the last completed session),
+the gate and countdown are replaced by the live tower the second the session goes
+on air, and the panel comes back when the flag drops — no reload, nothing to
+press. The broadcast window follows it too: an operator-approved embed is the
+picture, not the proof, so the stream is mounted only while the session is live,
+and the paddock chat is locked the rest of the week.
+
+### Verify the live path
+
+`.verify/` holds a harness that drives that gate end to end against a mock of
+both upstreams: one server answers as OpenF1 (schedule plus archive), the other
+as F1's live timing hub (negotiate + WebSocket, replaying a real captured
+session) and counts connections, so “nothing connects while nothing is on air”
+is asserted rather than assumed. It walks no session → testing → race → flag →
+qualifying → sprint qualifying in one run.
+
+```bash
+node .verify/mock-live-stack.cjs &        # :4010 OpenF1 stand-in, :4011 live hub
+OPENF1_API_URL=http://127.0.0.1:4010/v1 \
+APEX_SIGNAL_URL=http://127.0.0.1:4011 \
+APEX_SIGNAL_STATIC=http://127.0.0.1:4011/static/ \
+APEX_SCHEDULE_TTL_MS=2000 APEX_STATE_TTL_MS=2000 APEX_STATE_LIVE_TTL_MS=1000 \
+PORT=3100 node server.js &
+node .verify/live-checks.cjs               # 41 checks, 0 expected failures
+```
+
+Start a fresh site process for every run: one check is that the feed's
+“finished” verdict is remembered, which only holds within a process.
 
 Beside it, the team radio panel lists the session's driver-to-pit-wall
-recordings, newest first, with a link back to each F1-hosted clip. Transcription
+recordings, newest first, each with a play button that streams the clip in place
+(one call at a time — pressing another takes over, and a clip that cannot be
+played says so instead of pretending) and a link to the source. While the
+session is on air the calls come from the live feed as they are published (the
+clip addresses are built from the session path the hub announces); afterwards
+the panel falls back to OpenF1's archive for the same session. Transcription
 runs through Groq Whisper (`whisper-large-v3-turbo` by default): the page asks
 `POST /api/live/radio/transcribe` for the next untranscribed call, the server
 answers one clip at a time with a 6 second floor between calls, and every
@@ -189,10 +271,13 @@ the content security policy can stay locked to same-origin media.
 ## Accuracy notes
 
 OpenF1 is an unofficial provider; historical data from 2023 onward is free, while
-real-time data needs a paid subscription, so the timing tower reads the latest
-completed session and labels itself accordingly, and a session inside OpenF1's
-live window falls back to the saved classification rather than pretending to be
-live. Team radio transcripts are machine generated and can mis-hear names, tyre
+its real-time endpoints need a paid subscription. The live tower does not depend
+on that plan: it is pushed from F1's own live timing hub, and OpenF1 is used for
+the archive between sessions (`OPENF1_API_KEY` is optional and only widens the
+archive reads). If the feed cannot be reached while a session is on air, the
+panel says so in as many words instead of showing that session's stale data as
+current. Nothing of the site's own second-by-second updating depends on either:
+the countdown, the freshness stamps and the tower's polling all run regardless. Team radio transcripts are machine generated and can mis-hear names, tyre
 calls and radio traffic; treat them as a reading aid, not a record.
 Jolpica (the Ergast successor) is used as an independent fallback. Newsletter
 signup stores consented addresses but does not deliver campaigns. Reaction scores
