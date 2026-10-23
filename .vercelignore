@@ -1,7 +1,11 @@
 .git
 .gitignore
+.env*
 apikey.txt
 data/site.json
+apex-store-*.json
+.kombai
+.verify
 *.log
 run.ps1
 .vercel
