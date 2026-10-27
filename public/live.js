@@ -4,23 +4,38 @@ const $=s=>document.querySelector(s);
 // the picture, not the proof that anything is running: only the session state
 // (the same answer the timing tower and the radio panel read) can put this
 // panel on air, so a forgotten operator switch cannot leave the page saying ON
-// AIR through a quiet week.
+// AIR through a quiet week. The stream still opens an hour before each session —
+// the pre-show — on its own window, so it appears every weekend without anyone
+// touching the switch.
 let liveState=null,lastProbeLive=null,feedError='',broadcastConfig=null;
-function broadcastLive(){return Boolean(broadcastConfig&&broadcastConfig.status==='live'&&broadcastConfig.streamUrl&&liveState&&liveState.live)}
+function broadcastWindow(){const b=liveState&&liveState.broadcast;return Boolean(b&&b.open)}
+function broadcastLive(){return Boolean(broadcastConfig&&broadcastConfig.status==='live'&&broadcastConfig.streamUrl&&liveState&&(liveState.live||broadcastWindow()))}
+function streamLead(){
+  const b=liveState&&liveState.broadcast,s=b&&b.session,start=s&&s.startsAt?Date.parse(s.startsAt):NaN;
+  if(!Number.isFinite(start))return 'PRE-SHOW';
+  const mins=Math.max(0,Math.round((start-Date.now())/60000));
+  if(mins>=60){const h=Math.floor(mins/60),m=mins%60;return `PRE-SHOW · LIGHTS OUT IN ${h}H${m?' '+m+'M':''}`}
+  return mins>0?`PRE-SHOW · LIGHTS OUT IN ${mins} MIN`:'PRE-SHOW · LIGHTS OUT';
+}
 function renderBroadcast(){
   const status=$('#statusPill');if(!status||!broadcastConfig)return;
-  const live=broadcastLive(),onAir=Boolean(liveState&&liveState.live),statusText=broadcastConfig.status;
+  const live=broadcastLive(),onAir=Boolean(liveState&&liveState.live),preShow=live&&!onAir,statusText=broadcastConfig.status;
   status.className=`status-pill ${live?'live':onAir?'scheduled':statusText==='complete'?'complete':'scheduled'}`;
-  status.textContent=live?'● ON AIR':onAir?'● SESSION LIVE · NO STREAM':'● NEXT SESSION';
+  status.textContent=live?(preShow?'● PRE-SHOW LIVE':'● ON AIR'):onAir?'● SESSION LIVE · NO STREAM':'● NEXT SESSION';
   const lockup=screen.querySelector('.broadcast-lockup'),corner=screen.querySelector('.broadcast-corner'),scan=screen.querySelector('.broadcast-scan'),foot=screen.querySelector('.broadcast-foot');
   lockup?.toggleAttribute('hidden',live);corner?.toggleAttribute('hidden',live);scan?.toggleAttribute('hidden',live);
   if(corner)corner.innerHTML=live?'APEX <span>LIVE</span>':'APEX <span>RACE CONTROL</span>';
-  if(foot)foot.innerHTML=live?`${escapeHtml(broadcastConfig.sessionLabel||'LIVE SESSION')} <span>OPERATOR EMBED</span>`:'STREAM WILL APPEAR HERE <span>OPERATOR-APPROVED EMBED</span>';
+  if(foot)foot.innerHTML=live?`${escapeHtml(broadcastConfig.sessionLabel||'LIVE SESSION')} <span>${escapeHtml(preShow?streamLead():'OPERATOR EMBED')}</span>`:`STREAM WILL APPEAR HERE <span>OPENS ${escapeHtml(leadLabel())} BEFORE THE SESSION</span>`;
   mountBroadcast(live?broadcastConfig.streamUrl:'',broadcastConfig.sessionLabel);
 }
-// The operator-approved embed arrives only while the session is live, and it
-// brings its own play, volume and fullscreen controls, so the 16:9 window is
-// handed straight to the provider.
+function leadLabel(){
+  const b=liveState&&liveState.broadcast,mins=b&&b.leadMs?Math.round(b.leadMs/60000):60;
+  if(mins%60)return `${mins} MIN`;
+  const h=mins/60;return h===1?'1 HOUR':`${h} HOURS`;
+}
+// The operator-approved embed arrives with the pre-show — an hour before the
+// session and through to the flag — and it brings its own play, volume and
+// fullscreen controls, so the 16:9 window is handed straight to the provider.
 function mountBroadcast(url,label){const host=screen?.querySelector('.broadcast-frame');if(!host)return;const current=host.querySelector('iframe');if(!url){current?.remove();return}if(current&&current.dataset.source===url)return;current?.remove();const el=document.createElement('iframe');el.dataset.source=url;el.title=label||'Race broadcast';el.setAttribute('allow','autoplay; encrypted-media; picture-in-picture; fullscreen');el.setAttribute('referrerpolicy','strict-origin-when-cross-origin');el.src=url;host.insertAdjacentElement('afterbegin',el)}
 function offsetMinutes(value){const m=String(value||'00:00:00').match(/^([+-]?\d{2}):(\d{2})/);return m?(Number(m[1])*60+Math.sign(Number(m[1])||1)*Number(m[2])):0}
 function shiftedDate(iso,offset){return new Date(Date.parse(iso)+offsetMinutes(offset)*60000)}

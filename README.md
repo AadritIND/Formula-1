@@ -206,6 +206,7 @@ Everything else is off air, and nothing polls: testing, shakedowns and `Day 2`
 sessions never count, so an idle week costs no requests and no connections. Set
 `APEX_LIVE_KINDS` (for example `race,sprint`) to narrow which sessions go live,
 `APEX_LIVE_LEAD_MS` / `APEX_LIVE_GRACE_MS` to widen the window,
+`APEX_BROADCAST_LEAD_MS` to change how early the stream opens (default one hour),
 `APEX_STATE_LIVE_TTL_MS` / `APEX_STATE_TTL_MS` to change how often the answer is
 recomputed on air and off it (default 5 s / 5 min), and `APEX_SIGNAL_URL` /
 `APEX_SIGNAL_STATIC` if F1 ever moves the hub.
@@ -214,9 +215,11 @@ The page follows the same answer: the countdown ticks in the circuit's own time
 while the session is off air (the tower below is the last completed session),
 the gate and countdown are replaced by the live tower the second the session goes
 on air, and the panel comes back when the flag drops — no reload, nothing to
-press. The broadcast window follows it too: an operator-approved embed is the
-picture, not the proof, so the stream is mounted only while the session is live,
-and the paddock chat is locked the rest of the week.
+press. The broadcast has its own window: an operator-approved embed is the
+picture, not the proof, so it is mounted from one hour before each session
+starts (the pre-show) until the grace period ends, and never outside it — every
+weekend, without touching the switch. The paddock chat still follows the session
+itself, so it stays locked until the lights go out.
 
 ### Verify the live path
 

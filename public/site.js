@@ -163,7 +163,7 @@ window.APEX={api,toast,escapeHtml,openF1Schedule,openF1Json,openF1Standings,open
 window.openF1Standings=openF1Standings;
 window.openF1Timing=openF1Timing;
 
-const pageScripts={home:'/home.js?v=6',live:'/live.js?v=19',timing:'/timing.js?v=5',standings:'/standings.js?v=6',calendar:'/calendar.js?v=14',news:'/news.js?v=2','fan-zone':'/fan-zone.js?v=3',admin:'/admin.js?v=15',privacy:'/privacy.js?v=5'};
+const pageScripts={home:'/home.js?v=6',live:'/live.js?v=20',timing:'/timing.js?v=5',standings:'/standings.js?v=6',calendar:'/calendar.js?v=14',news:'/news.js?v=2','fan-zone':'/fan-zone.js?v=3',admin:'/admin.js?v=15',privacy:'/privacy.js?v=5'};
 if(pageScripts[pageName]){
   const pageScript=document.createElement('script');
   pageScript.src=pageScripts[pageName];
